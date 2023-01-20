@@ -20,6 +20,6 @@ jobs:
     - name: Test
       run: cargo test --verbose -p catered-backend
     - name: Build
-      run: cargo build -vp catered-backend && trunk build frontend/index.html
+      run: trunk build frontend/index.html
       
       
