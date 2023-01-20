@@ -6,7 +6,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
   test:
 
@@ -14,6 +14,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        # Fetch the whole history to prevent unrelated history errors
+        fetch-depth: '0'
     - uses: jetli/trunk-action@v0.4.0
     
     - name: Test
@@ -25,14 +28,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    - name: Merge
-      uses: devmasx/merge-branch@master
+    - uses: actions/checkout@v3
       with:
-        type: now
-        target_branch: deploy
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-      
-      
+        # Fetch the whole history to prevent unrelated history errors
+        fetch-depth: '0'
+    
+    - name: Merge Fast Forward
+      uses: MaximeHeckel/github-action-merge-fast-forward@v1.1.0
+      with:
+        # Branch to merge
+        branchtomerge: main
+        # Branch that will be updated
+        branch: deploy  
