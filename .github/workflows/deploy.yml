@@ -1,0 +1,38 @@
+name: Auto deploy
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: jetli/trunk-action@v0.4.0
+    
+    - name: Test
+      run: cargo test --verbose -p catered-backend
+    - name: Build
+      run: cargo build -vp catered-backend && trunk build frontend/index.html
+      
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Merge
+      uses: devmasx/merge-branch@master
+      with:
+        type: now
+        target_branch: deply
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+      
+      
