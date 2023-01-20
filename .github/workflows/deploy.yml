@@ -17,12 +17,15 @@ jobs:
       with:
         # Fetch the whole history to prevent unrelated history errors
         fetch-depth: '0'
+    - uses: dtolnay/rust-toolchain@v1
+      with:
+        targets: wasm32-unknown-unknown
     - uses: jetli/trunk-action@v0.4.0
     
     - name: Test
       run: cargo test --verbose -p catered-backend
     - name: Build
-      run: cargo build -vp catered-backend && trunk build frontend/index.html
+      run: trunk build frontend/index.html
       
   deploy:
     needs: test
