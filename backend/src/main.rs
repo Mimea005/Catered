@@ -1,6 +1,8 @@
 use std::env;
-
 use actix_web::{HttpServer, App, web};
+
+pub mod scopes;
+use scopes::api;
 
 
 #[actix_web::main]
@@ -12,13 +14,9 @@ async fn main() -> std::io::Result<()>{
 
     HttpServer::new(|| {
         App::new()
-            .route("/", web::get().to(hello))
+            .service(web::scope("/api").configure(api::configure))
     })
     .bind(("0.0.0.0", port))?
     .run()
     .await
-}
-
-async fn hello() -> &'static str {
-    "Hello!"
 }
