@@ -6,7 +6,6 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   test:
@@ -29,10 +28,11 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Up Merge
-      uses: bambamboole/gha-upmerge@master
+    - name: Merge
+      uses: devmasx/merge-branch@master
       with:
-        from_branch: 'master'
-        to_branch: 'deploy'
+        type: now
+        target_branch: deply
+        github_token: ${{ secrets.GITHUB_TOKEN }}
       
       
