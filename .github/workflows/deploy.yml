@@ -25,6 +25,7 @@ jobs:
       run: cargo build -vp catered-backend && trunk build frontend/index.html
       
   deploy:
+    needs: test
     runs-on: ubuntu-latest
 
     steps:
