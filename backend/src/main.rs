@@ -1,7 +1,6 @@
-use std::net::Ipv4Addr;
-
 use rocket::{self, routes, get, Config};
 use anyhow::Result;
+
 
 #[rocket::main]
 async fn main() -> Result<()> {
@@ -12,15 +11,9 @@ async fn main() -> Result<()> {
             String::from("8080")
         })
     .parse()?;
-    let address = Ipv4Addr::new(0,0,0,0).into();
-
-    let server_config = Config {
-        port, address,
-        ..Default::default()
-    };
 
     let _server = rocket::build()
-        .configure(server_config)
+        .configure(Config {port, ..Default::default()})
         .mount("/", routes![hello])
         .launch()
     .await?;
