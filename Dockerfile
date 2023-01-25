@@ -10,11 +10,11 @@ COPY types/ ./types
 COPY backend/ ./backend
 COPY frontend/ ./frontend
 
-RUN cargo build -rvp catered-backend
+RUN cargo build -rvp backend
 RUN trunk build --release -d web frontend/index.html
 
 FROM ubuntu:latest
-COPY --from=builder /bench/target/release/catered-backend /bin/catered-backend
+COPY --from=builder /bench/target/release/backend /bin/backend
 COPY --from=builder /bench/web ./web
 
 CMD ["catered-backend"]
