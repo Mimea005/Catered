@@ -1,24 +1,29 @@
-use std::env;
+use std::net::{Ipv4Addr};
+use rocket::{self, Config, fs};
+use anyhow::Result;
+use scopes::api;
 
-use actix_web::{HttpServer, App, web};
+mod scopes;
 
+#[rocket::main]
+async fn main() -> Result<()> {
 
-#[actix_web::main]
-async fn main() -> std::io::Result<()>{
-    let port = env::var("PORT")
-        .unwrap_or(String::from("8080"))
-        .parse()
-        .expect("Failed to conert port to number");
+    let port = std::env::var("PORT")
+        .unwrap_or_else(|_| {
+            println!("PORT not defined, using 8080");
+            String::from("8080")
+        })
+    .parse()?;
 
-    HttpServer::new(|| {
-        App::new()
-            .route("/", web::get().to(hello))
-    })
-    .bind(("0.0.0.0", port))?
-    .run()
-    .await
-}
+    let address = Ipv4Addr::new(0,0,0,0).into();
 
-async fn hello() -> &'static str {
-    "Hello!"
+    let _server = rocket::build()
+        .configure(Config {port, address , ..Config::debug_default()})
+        .attach(api::Routes)
+        .attach(api::dishes::Routes)
+        .mount("/", fs::FileServer::new("./web", fs::Options::default()))
+        .launch()
+    .await?;
+
+    Ok(())
 }

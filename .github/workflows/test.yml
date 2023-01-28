@@ -16,9 +16,11 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: jetli/trunk-action@v0.4.0
+    - name: add wasm32
+      run: rustup target add wasm32-unknown-unknown
     
     - name: Test
-      run: cargo test --verbose -p catered-backend
+      run: cargo test --verbose -p backend
     - name: Build
       run: trunk build frontend/index.html
       
