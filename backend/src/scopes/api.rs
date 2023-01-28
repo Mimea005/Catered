@@ -1,18 +1,26 @@
-use actix_web::{web, get, Responder};
+use rocket::{fairing, Rocket, Build, routes, get};
 
+pub struct Routes;
 
-pub fn configure(cfg: &mut web::ServiceConfig) {
-    cfg
-        .service(api_info)
-        .service(
-            web::scope("/dishes")
-                .configure(dishes::configure)
-        )
-    ;
+#[rocket::async_trait]
+impl fairing::Fairing for Routes {
+    fn info(&self) -> rocket::fairing::Info {
+        fairing::Info {
+            name: "api",
+            kind: fairing::Kind::Ignite,
+        }
+    }
+
+    async fn on_ignite(&self, mut rocket: Rocket<Build>) -> fairing::Result {
+
+        rocket = rocket.mount("/api", routes![api_info]);
+
+        fairing::Result::Ok(rocket)
+    }
 }
 
 #[get("/")]
-async fn api_info() -> &'static str {
+pub async fn api_info() -> &'static str {
 "
 This is Catered's first api (V1)
     
@@ -20,11 +28,25 @@ This is Catered's first api (V1)
 "
 }
 
-mod dishes {
-    use super::*;
-    use actix_web::{Either, HttpResponse};
-    use serde_json::json;
+pub mod dishes {
+    use rocket::{async_trait, fairing::{Fairing, Info, Kind, self}, Rocket, Build, serde::json::Json, get, routes};
     use types::Dish;
+
+    pub struct Routes;
+    #[async_trait]
+    impl Fairing for Routes {
+        fn info(&self) -> Info {
+            Info { name: "api:dishes", kind: Kind::Ignite }
+        }
+
+        async fn on_ignite(&self, mut rocket: Rocket<Build>) -> fairing::Result {
+
+            rocket = rocket.mount("/api/dishes", routes![all_dishes]);
+            
+
+            fairing::Result::Ok(rocket)
+        }
+    }
     
     const MENU: [Dish; 2] = [
         types::Dish {
@@ -40,35 +62,9 @@ mod dishes {
             publisher: "Kao"
         }
     ];
-    
-    pub fn configure(cfg: &mut web::ServiceConfig) {
-        cfg
-            .service(get_menu)
-            .service(get_dish)
-        ;
-    }
 
-    #[get("/")]
-    async fn get_menu() -> impl Responder {
-        let dishes = MENU.clone()
-            .map(|d| {
-                json!({
-                    "name": d.name,
-                    "description": d.description
-                })
-            });
-        
-        web::Json(dishes)
-    }
-
-    #[get("/{name}/")]
-    async fn get_dish(req: web::Path<String>) -> Either<web::Json<Dish<'static>>, HttpResponse> {
-        let found = MENU.iter()
-            .filter(|d| d.name == req.clone())
-            .next();
-        match found {
-            Some(dish) => Either::Left(web::Json(dish.clone())),
-            None => Either::Right(HttpResponse::NotFound().body("Not a dish").into())
-        }
+    #[get("/all")]
+    async fn all_dishes() -> Json<[Dish<'static>; 2]> {
+        Json::from(MENU)
     }
 }

@@ -1,6 +1,9 @@
-use rocket::{self, routes, get, Config};
+use std::net::{Ipv4Addr};
+use rocket::{self, Config, fs};
 use anyhow::Result;
+use scopes::api;
 
+mod scopes;
 
 #[rocket::main]
 async fn main() -> Result<()> {
@@ -12,16 +15,15 @@ async fn main() -> Result<()> {
         })
     .parse()?;
 
+    let address = Ipv4Addr::new(0,0,0,0).into();
+
     let _server = rocket::build()
-        .configure(Config {port, ..Default::default()})
-        .mount("/", routes![hello])
+        .configure(Config {port, address , ..Config::debug_default()})
+        .attach(api::Routes)
+        .attach(api::dishes::Routes)
+        .mount("/", fs::FileServer::new("./web", fs::Options::default()))
         .launch()
     .await?;
 
     Ok(())
-}
-
-#[get("/")]
-fn hello() -> &'static str {
-    "Helo world!"
 }
