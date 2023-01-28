@@ -23,7 +23,7 @@ jobs:
     - uses: jetli/trunk-action@v0.4.0
     
     - name: Test
-      run: cargo test --verbose -p catered-backend
+      run: cargo test --verbose -p backend
     - name: Build
       run: trunk build frontend/index.html
       
